@@ -13,6 +13,8 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">Add New Employee</button>
         </div>
 
+        <div id="alertContainer" class="mb-3"></div>
+
         <div id="messages"></div>
 
         <div class="card">
@@ -143,6 +145,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function showAlert(message, type = 'success') {
+            // Remove any existing modal backdrop
+            const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+            modalBackdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            
+            const alertContainer = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            alertContainer.appendChild(alert);
+            
+            // Auto-dismiss after 3 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
         function populateEditForm(employeeId) {
             fetch(`/edit/${employeeId}`, {
                 method: 'GET',
@@ -189,9 +212,17 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    location.reload();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addModal'));
+                    modal.hide();
+                    // Clean up modal effects
+                    document.body.classList.remove('modal-open');
+                    const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+                    modalBackdrops.forEach(backdrop => backdrop.remove());
+                    
+                    showAlert('Employee Added Successfully!');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert(data.message);
+                    showAlert(data.message, 'danger');
                 }
             });
         });
@@ -220,14 +251,22 @@
             .then(data => {
                 console.log('Processed data:', data);
                 if (data.status === 'success') {
-                    location.reload();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                    modal.hide();
+                    // Clean up modal effects
+                    document.body.classList.remove('modal-open');
+                    const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+                    modalBackdrops.forEach(backdrop => backdrop.remove());
+                    
+                    showAlert('Employee Updated Successfully!');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
                     throw new Error(data.message || 'Error updating employee');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error updating employee: ' + error.message);
+                showAlert('Error updating employee: ' + error.message, 'danger');
             });
         });
 
@@ -239,14 +278,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        location.reload();
+                        showAlert('Employee Deleted Successfully!');
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        alert(data.message);
+                        showAlert(data.message, 'danger');
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while deleting the employee.');
+                    showAlert('An error occurred while deleting the employee.', 'danger');
                 });
             }
         }
