@@ -14,28 +14,25 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add():
-    name = request.form['name']
-    email = request.form['email']
-    phone = request.form['phone']
-    address = request.form['address']
-    dob = request.form['dob']
-    position = request.form['position']
-
-    cur = mysql.connection.cursor()
     try:
-        cur.execute(""" 
-            INSERT INTO employees (name, email, phone, address, dob, position) 
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (name, email, phone, address, dob, position))
+        employee = {
+            'name': request.form['name'],
+            'email': request.form['email'],
+            'phone': request.form['phone'],
+            'address': request.form['address'],
+            'dob': request.form['dob'],
+            'position': request.form['position']
+        }
         
-        mysql.connection.commit()
-        return jsonify({'status': 'success'})
-    except MySQLdb.IntegrityError as e:
-        if 'Duplicate entry' in str(e):
-            return jsonify({'status': 'error', 'message': 'Email already exists!'})
-        return jsonify({'status': 'error', 'message': str(e)})
-    finally:
-        cur.close()
+        db = DB()
+        result = db.add_employee(employee)
+        if result['status'] == 'success':
+            return jsonify({'status': 'success'})
+        else:
+            return jsonify(result), 400
+    except Exception as e:
+        app.logger.error(f"Error adding employee: {str(e)}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/edit/<int:id>', methods=['GET', 'POST'])
 def edit(id):
@@ -73,15 +70,12 @@ def edit(id):
 
 @app.route('/delete/<int:id>', methods=['POST'])
 def delete(id):
-    cur = mysql.connection.cursor()
     try:
-        cur.execute("DELETE FROM employees WHERE id = %s", (id,))
-        mysql.connection.commit()
+        db = DB()
+        result = db.delete_employee(id)
         return jsonify({'status': 'success'})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
-    finally:
-        cur.close()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

@@ -25,9 +25,26 @@ class DB:
             return {'status': 'error', 'message': str(e)}
 
     def add_employee(self, employee):
-        query = "INSERT INTO employees (name, email, phone, address, dob, position) VALUES (%s, %s, %s, %s, %s, %s)"
-        self.cursor.execute(query, (employee['name'], employee['email'], employee['phone'], employee['address'], employee['dob'], employee['position']))
-        self.conn.commit()
+        try:
+            query = "INSERT INTO employees (name, email, phone, address, dob, position) VALUES (%s, %s, %s, %s, %s, %s)"
+            self.cursor.execute(query, (
+                employee['name'],
+                employee['email'],
+                employee['phone'],
+                employee['address'],
+                employee['dob'],
+                employee['position']
+            ))
+            self.conn.commit()
+            return {'status': 'success'}
+        except mysql.connector.Error as e:
+            self.conn.rollback()
+            if e.errno == 1062:  # Duplicate entry error
+                return {'status': 'error', 'message': 'Email already exists!'}
+            return {'status': 'error', 'message': str(e)}
+        except Exception as e:
+            self.conn.rollback()
+            return {'status': 'error', 'message': str(e)}
 
     def get_employee(self, employee_id):
         try:
@@ -62,6 +79,11 @@ class DB:
             return {'status': 'error', 'message': f'Update failed: {str(e)}'}
 
     def delete_employee(self, employee_id):
-        query = "DELETE FROM employees WHERE id = %s"
-        self.cursor.execute(query, (employee_id,))
-        self.conn.commit()
+        try:
+            query = "DELETE FROM employees WHERE id = %s"
+            self.cursor.execute(query, (employee_id,))
+            self.conn.commit()
+            return {'status': 'success'}
+        except Exception as e:
+            self.conn.rollback()
+            return {'status': 'error', 'message': str(e)}
