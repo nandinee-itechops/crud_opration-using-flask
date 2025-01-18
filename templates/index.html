@@ -202,8 +202,47 @@
             });
         }
 
+        // Add these validation functions
+        function validateName(name) {
+            const nameRegex = /^[A-Za-z\s]+$/;
+            return nameRegex.test(name);
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePhone(phone) {
+            const phoneRegex = /^\d{10}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Update add form submission
         document.getElementById('addEmployeeForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            const name = this.elements['name'].value;
+            const email = this.elements['email'].value;
+            const phone = this.elements['phone'].value;
+
+            // Validate name
+            if (!validateName(name)) {
+                showAlert('Name should contain only letters and spaces', 'danger');
+                return;
+            }
+
+            // Validate email
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address', 'danger');
+                return;
+            }
+
+            // Validate phone
+            if (!validatePhone(phone)) {
+                showAlert('Phone number should be exactly 10 digits', 'danger');
+                return;
+            }
+
             const formData = new FormData(this);
             fetch('/add', {
                 method: 'POST',
@@ -230,6 +269,28 @@
         // Update the edit form submission
         document.getElementById('editEmployeeForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            const name = this.elements['name'].value;
+            const email = this.elements['email'].value;
+            const phone = this.elements['phone'].value;
+
+            // Validate name
+            if (!validateName(name)) {
+                showAlert('Name should contain only letters and spaces', 'danger');
+                return;
+            }
+
+            // Validate email
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address', 'danger');
+                return;
+            }
+
+            // Validate phone
+            if (!validatePhone(phone)) {
+                showAlert('Phone number should be exactly 10 digits', 'danger');
+                return;
+            }
+
             const formData = new FormData(this);
             const id = document.getElementById('editId').value;
             
@@ -268,6 +329,43 @@
                 console.error('Error:', error);
                 showAlert('Error updating employee: ' + error.message, 'danger');
             });
+        });
+
+        // Add input event listeners for real-time validation
+        document.getElementById('addName').addEventListener('input', function() {
+            if (!validateName(this.value)) {
+                this.setCustomValidity('Name should contain only letters and spaces');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('addPhone').addEventListener('input', function() {
+            if (!validatePhone(this.value)) {
+                this.setCustomValidity('Phone number should be exactly 10 digits');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('editName').addEventListener('input', function() {
+            if (!validateName(this.value)) {
+                this.setCustomValidity('Name should contain only letters and spaces');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        document.getElementById('editPhone').addEventListener('input', function() {
+            if (!validatePhone(this.value)) {
+                this.setCustomValidity('Phone number should be exactly 10 digits');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
         });
 
         function deleteEmployee(id) {

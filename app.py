@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 import logging
-from home import DB
+from config import DB
 
 app = Flask(__name__)
 app.secret_key = 'many random bytes'
