@@ -24,7 +24,16 @@ function populateEditForm(employeeId) {
         document.getElementById('editPhone').value = employee.phone;
         document.getElementById('editAddress').value = employee.address;
         document.getElementById('editDob').value = employee.dob;
-        document.getElementById('editPosition').value = employee.position;
+        
+        // Handle position dropdown
+        const positionSelect = document.getElementById('editPosition');
+        const positions = Array.from(positionSelect.options).map(opt => opt.value);
+        
+        if (employee.position && !positions.includes(employee.position)) {
+            const newOption = new Option(employee.position, employee.position);
+            positionSelect.add(newOption);
+        }
+        positionSelect.value = employee.position;
         
         new bootstrap.Modal(document.getElementById('editModal')).show();
     })
@@ -39,6 +48,7 @@ document.getElementById('editEmployeeForm').addEventListener('submit', function(
     const name = this.elements['name'].value;
     const email = this.elements['email'].value;
     const phone = this.elements['phone'].value;
+    const position = this.elements['position'].value;
 
     if (!validateName(name)) {
         showAlert('Name should contain only letters and spaces', 'danger');
@@ -52,6 +62,11 @@ document.getElementById('editEmployeeForm').addEventListener('submit', function(
 
     if (!validatePhone(phone)) {
         showAlert('Phone number should be exactly 10 digits', 'danger');
+        return;
+    }
+
+    if (!position) {
+        showAlert('Please select a position', 'danger');
         return;
     }
 
@@ -106,4 +121,16 @@ document.getElementById('editPhone').addEventListener('input', function() {
     } else {
         this.setCustomValidity('');
     }
+});
+
+// Reset position dropdown when modal is hidden
+document.getElementById('editModal').addEventListener('hidden.bs.modal', function () {
+    const positionSelect = document.getElementById('editPosition');
+    // Remove any custom added options
+    Array.from(positionSelect.options).forEach(option => {
+        if (!option.defaultSelected && option.value !== '') {
+            positionSelect.remove(option.index);
+        }
+    });
+    positionSelect.value = '';
 });

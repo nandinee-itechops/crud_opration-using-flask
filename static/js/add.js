@@ -3,6 +3,12 @@ document.getElementById('addEmployeeForm').addEventListener('submit', function(e
     const name = this.elements['name'].value;
     const email = this.elements['email'].value;
     const phone = this.elements['phone'].value;
+    const position = this.elements['position'].value;
+
+    if (!position) {
+        showAlert('Please select a position', 'danger');
+        return;
+    }
 
     if (!validateName(name)) {
         showAlert('Name should contain only letters and spaces', 'danger');
@@ -57,4 +63,9 @@ document.getElementById('addPhone').addEventListener('input', function() {
     } else {
         this.setCustomValidity('');
     }
+});
+
+// Reset position dropdown when modal is hidden
+document.getElementById('addModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('addPosition').value = '';
 });
